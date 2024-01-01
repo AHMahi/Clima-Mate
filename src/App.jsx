@@ -145,7 +145,7 @@ const App = () => {
       });
   };
 
-  // Function to fetch forecast
+  // Function to fetch forecast of 5 days including today
   const fetchWeatherOfUpcomingDays = async (lat, lon) => {
     const URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_key}`;
     
