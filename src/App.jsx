@@ -145,7 +145,7 @@ const App = () => {
       });
   };
 
-  // Function to 
+  // Function to fetch forecast
   const fetchWeatherOfUpcomingDays = async (lat, lon) => {
     const URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_key}`;
     
@@ -153,16 +153,13 @@ const App = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.cod == 200) {
-          console.log("All good!");
-          
           let forecast = {};
-          let daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
           let index = 0;
 
           for (let i = 0; i < data.list.length; i = i + 8) {
             var currDate = new Date(data.list[i].dt_txt.substring(0,11));
 
-            forecast[index] = {
+            forecast[index++] = {
               date: currDate.getDate() > 9 ? currDate.getDate() : "0" + currDate.getDate(),
               day: currDate.toString().substring(0, 3),
               temperature: data.list[i].main.temp,
@@ -170,21 +167,29 @@ const App = () => {
                 (weather) => weather.type === data.list[i].weather[0].main
               )[0].img
             };
-
-            index++;
           }
 
           setGpsForecastData(forecast);
-
-        } else {
+        } 
+        else {
           console.log("Whoops!");
         }
-
-        // console.log(data);
       })
       .catch((err) => {
         console.log(err);
       });
+  };
+
+  const forecastWeather = () => {
+    return (
+      Object.values(gpsForecastData).map((val, i) => (
+        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
+          <h1 className={`${i == 0 ? "font-bold" : null} text-center mt-2 text-xl`}>{i === 0 ? "Today" : val.day + " " + val.date}</h1>
+          <img src={gpsForecastData ? val.weather_type : null} className="w-20 h-20 self-center m-[25%] mb-[15%]" />
+          <h1 className={`${i == 0 ? "font-bold" : null} text-center mt-8 text-lg`}>{gpsForecastData ? Math.round(val.temperature) + "° C" : null}</h1>
+        </div>
+      ))
+    )
   };
 
   // Fetch weather data for the user's current location when the component mounts
@@ -356,23 +361,15 @@ const App = () => {
       </div>
       <h2 className="mb-4 mx-4 pl-14 text-3xl mt-16 font-semibold">Upcoming Weather</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mx-16 pl-10 border-4 p-8 rounded-3xl shadow-md border-yellow-400 bg-white">
-        { gpsForecastData
-          ? 
-          Object.values(gpsForecastData).map((val, i) => {
-            return(
-              <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
-                <h1 className="font-bold text-center mt-2">{
-                  i === 0 ? "Today" : val.day + " " + val.date
-                }</h1>
-                <img src={
-                  gpsForecastData ? val.weather_type : null
-                } className="w-20 h-20 self-center m-[25%] mb-[15%]" />
-                <h1 className="font-bold text-center mt-8">{gpsForecastData ? val.temperature : null}</h1>
-              </div>
-            )
-          })
+        { 
+          gpsForecastData
+          ? forecastWeather()
           : null
         }
+        <div className="flex flex-col justify-center items-center border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
+          <h1 className="text-xl">View More</h1>
+          <img src="https://cdn-icons-png.flaticon.com/512/9794/9794283.png" className="w-[20%] mt-5"/>
+        </div>
       </div>
     </div>
   );
