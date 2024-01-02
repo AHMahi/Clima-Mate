@@ -24,6 +24,15 @@ const App = () => {
   const [searchHourlyForecast, setSearchHourlyForecast] = useState(null);
   const [gpsHourlyForecast, setGpsHourlyForecast] = useState(null);
 
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp * 1000); // Convert seconds to milliseconds
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const convertToKilometersPerHour = (speedInMetersPerSecond) => {
+    return speedInMetersPerSecond * 3.6;
+  };  
+
 
   // Weather types and their corresponding icons
   const WeatherTypes = [
@@ -199,7 +208,7 @@ const App = () => {
 
   return (
     <div className="pb-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-10 pl-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 my-10 pl-16">
         {/* Card-1: Weather based on search */}
         <div className="border-4 border-yellow-400 w-92 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
           <div>
@@ -356,8 +365,40 @@ const App = () => {
             )}
           </div>
         </div>
-        <div className="border-4 border-yellow-400 w-92 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-92 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
+        {/* Card-3 Wateher Deatils*/}
+        <div className="custom-card">
+          {gpsApiData && (
+            <>
+              <p className="font-semibold text-xl mb-5">
+                Weather today in {gpsApiData?.name + ", " + gpsApiData?.sys?.country}
+              </p>
+              <h4 className="text-lg">Feels Like</h4>
+              <h2 className="text-4xl font-extrabold">
+                {Math.round(gpsApiData?.main?.temp)}&#176;C
+              </h2>
+              <div>
+                <p>
+                  <strong>Wind Speed:</strong> {convertToKilometersPerHour(gpsApiData?.wind?.speed)} km/h
+                </p>
+                <p>
+                  <strong>Probability of Rain:</strong> {gpsApiData?.pop}%
+                </p>
+                <p>
+                  <strong>UV Index:</strong> {gpsApiData?.uvi}
+                </p>
+                <p>
+                  <strong>Humidity:</strong> {gpsApiData?.main?.humidity}%
+                </p>
+                <p>
+                  <strong>Sunrise:</strong> {formatTime(gpsApiData?.sys?.sunrise)}
+                </p>
+                <p>
+                  <strong>Sunset:</strong> {formatTime(gpsApiData?.sys?.sunset)}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
       </div>
       <h2 className="mb-4 mx-4 pl-14 text-3xl mt-16 font-semibold">Upcoming Weather</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mx-16 pl-10 border-4 p-8 rounded-3xl shadow-md border-yellow-400 bg-white">
