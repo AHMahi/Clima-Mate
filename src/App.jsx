@@ -333,7 +333,7 @@ const App = () => {
                   <strong>Probability of Rain:</strong> {gpsApiData?.pop}%
                 </p>
                 <p>
-                  <strong>UV Index:</strong> {gpsApiData?.uvi}
+                  <strong>UV Index:</strong> {gpsApiData?.main?.uvi}
                 </p>
                 <p>
                   <strong>Humidity:</strong> {gpsApiData?.main?.humidity}%
