@@ -1,3 +1,4 @@
+import { list } from "postcss";
 import { useEffect, useRef, useState } from "react";
 
 // API key for OpenWeatherMap API
@@ -16,6 +17,8 @@ const App = () => {
   const [gpsApiData, setGpsApiData] = useState(null);
   const [gpsShowWeather, setGpsShowWeather] = useState(null);
   const [gpsLoading, setGpsLoading] = useState(false);
+
+  const [gpsForecastData, setGpsForecastData] = useState(null);
 
   // State variables to manage hourly forecast
   const [searchHourlyForecast, setSearchHourlyForecast] = useState(null);
@@ -110,6 +113,7 @@ const App = () => {
         (position) => {
           const { latitude, longitude } = position.coords;
           fetchWeatherByCoords(latitude, longitude);
+          fetchWeatherOfUpcomingDays(latitude, longitude);
         },
         (error) => {
           console.log(error);
@@ -138,7 +142,7 @@ const App = () => {
           ]);
         } else {
           setGpsShowWeather(
-            WeatherTypes.filter(
+            WeatherTypes.filter(  
               (weather) => weather.type === data.weather[0].main
             )
           );
@@ -150,6 +154,53 @@ const App = () => {
       });
   };
 
+  // Function to fetch forecast of 5 days including today
+  const fetchWeatherOfUpcomingDays = async (lat, lon) => {
+    const URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_key}`;
+    
+    fetch(URL)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.cod == 200) {
+          let forecast = {};
+          let index = 0;
+
+          for (let i = 0; i < data.list.length; i = i + 8) {
+            var currDate = new Date(data.list[i].dt_txt.substring(0,11));
+
+            forecast[index++] = {
+              date: currDate.getDate() > 9 ? currDate.getDate() : "0" + currDate.getDate(),
+              day: currDate.toString().substring(0, 3),
+              temperature: data.list[i].main.temp,
+              weather_type: WeatherTypes.filter(  
+                (weather) => weather.type === data.list[i].weather[0].main
+              )[0].img
+            };
+          }
+
+          setGpsForecastData(forecast);
+        } 
+        else {
+          console.log("Whoops!");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const forecastWeather = () => {
+    return (
+      Object.values(gpsForecastData).map((val, i) => (
+        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
+          <h1 className={`${i == 0 ? "font-bold" : null} text-center mt-2 text-xl`}>{i === 0 ? "Today" : val.day + " " + val.date}</h1>
+          <img src={gpsForecastData ? val.weather_type : null} className="w-20 h-20 self-center m-[25%] mb-[15%]" />
+          <h1 className={`${i == 0 ? "font-bold" : null} text-center mt-8 text-lg`}>{gpsForecastData ? Math.round(val.temperature) + "° C" : null}</h1>
+        </div>
+      ))
+    )
+  };
+
   // Fetch weather data for the user's current location when the component mounts
   useEffect(() => {
     getUserLocation();
@@ -159,7 +210,7 @@ const App = () => {
     <div className="pb-10">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 my-10 pl-16">
         {/* Card-1: Weather based on search */}
-        <div className="border-4 border-yellow-400 w-96 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
+        <div className="border-4 border-yellow-400 w-92 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
           <div>
             {/* Input and search button for getting user location */}
             <div className="text-2xl border-2 p-1 flex border-gray-400 items-center rounded-xl bg-white hover:border-black">
@@ -250,7 +301,7 @@ const App = () => {
         </div>
 
         {/* Card-2: Weather based on GPS location */}
-        <div className="border-4 border-yellow-400 w-96 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
+        <div className="border-4 border-yellow-400 w-92 p-4 rounded-3xl shadow-md bg-white hover:bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
           <div className="text-2xl font-semibold p-1 flex items-center rounded-3xl text-center">
             <img
               src="https://cdn-icons-png.flaticon.com/512/10411/10411041.png"
@@ -350,15 +401,16 @@ const App = () => {
         </div>
       </div>
       <h2 className="mb-4 mx-4 pl-14 text-3xl mt-16 font-semibold">Upcoming Weather</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mx-16 pl-10 border-4 p-8 rounded-3xl shadow-md border-yellow-400 bg-white">
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
-        <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out"></div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mx-16 pl-10 border-4 p-8 rounded-3xl shadow-md border-yellow-400 bg-white">
+        { 
+          gpsForecastData
+          ? forecastWeather()
+          : null
+        }
+        <div className="flex flex-col justify-center items-center border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
+          <h1 className="text-xl">View More</h1>
+          <img src="https://cdn-icons-png.flaticon.com/512/9794/9794283.png" className="w-[20%] mt-5"/>
+        </div>
       </div>
     </div>
   );
