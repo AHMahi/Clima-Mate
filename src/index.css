@@ -7,7 +7,7 @@
 }
 
 .custom-card {
-    width: 190%; /* Adjust as needed */
+    width: 200%; /* Adjust as needed */
     padding: 5%; /* Adjust as needed */
     border-width: 4px;
     border-color: #FFD700; /* Yellow color */
@@ -22,4 +22,23 @@
 .custom-card:hover {
   background-color: #FFD700; /* Yellow color on hover */
   border-color: #000000; /* Black border on hover */
+}
+
+.map {
+  position: absolute;
+  height: 500px;
+  width: 700px;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border: 10px solid rgb(105, 9, 93);
+}
+
+.h1 {
+  position: relative;
+  margin-top: 90px;
+  left: 45%;
+  color: rgb(105, 9, 93);
+  font-style: italic;
 }
