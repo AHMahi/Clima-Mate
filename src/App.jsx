@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { list } from "postcss";
 import { useEffect, useRef, useState } from "react";
 
@@ -13,7 +14,7 @@ const App = () => {
   const [searchShowWeather, setSearchShowWeather] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  // State variables to manage API data and weather display for card-2 (GPS location)
+  // State variables to manage API data and weather display for card-2 & 3 (GPS location)
   const [gpsApiData, setGpsApiData] = useState(null);
   const [gpsShowWeather, setGpsShowWeather] = useState(null);
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -30,8 +31,12 @@ const App = () => {
   };
 
   const convertToKilometersPerHour = (speedInMetersPerSecond) => {
-    return speedInMetersPerSecond * 3.6;
-  };  
+    return Math.round(speedInMetersPerSecond * 3.6);
+  };
+  
+  const capitalizeFirstLetter = (str) => {
+    return str.replace(/\b\w/g, (match) => match.toUpperCase());
+  };
 
 
   // Weather types and their corresponding icons
@@ -192,6 +197,7 @@ const App = () => {
   const forecastWeather = () => {
     return (
       Object.values(gpsForecastData).map((val, i) => (
+        // eslint-disable-next-line react/jsx-key
         <div className="border-4 border-yellow-400 w-48 h-64 p-4 rounded-3xl shadow-md bg-yellow-400 hover:border-black transition duration-200 ease-in-out">
           <h1 className={`${i == 0 ? "font-bold" : null} text-center mt-2 text-xl`}>{i === 0 ? "Today" : val.day + " " + val.date}</h1>
           <img src={gpsForecastData ? val.weather_type : null} className="w-20 h-20 self-center m-[25%] mb-[15%]" />
@@ -367,34 +373,48 @@ const App = () => {
         </div>
         {/* Card-3 Wateher Deatils*/}
         <div className="custom-card">
+        {console.log(JSON.stringify(gpsApiData, null, 2))}
           {gpsApiData && (
             <>
               <p className="font-semibold text-xl mb-5">
                 Weather today in {gpsApiData?.name + ", " + gpsApiData?.sys?.country}
               </p>
+              <h4 className="text-5xl mb-10 font-black">
+                {capitalizeFirstLetter(gpsApiData?.weather[0]?.description)}
+              </h4>
               <h4 className="text-lg">Feels Like</h4>
               <h2 className="text-4xl font-extrabold">
-                {Math.round(gpsApiData?.main?.temp)}&#176;C
+                {Math.round(gpsApiData?.main?.feels_like)}&#176;C
               </h2>
+              <h2 className="text-xl mt-4"><span className="font-bold">Minimum:</span> {Math.round(gpsApiData?.main?.temp_min)}&#176;C / <span className="font-bold">Maximum:</span> {Math.round(gpsApiData?.main?.temp_max)}&#176;C</h2>
               <div>
-                <p>
+                <p  className="mt-10">
+                <hr></hr>
                   <strong>Wind Speed:</strong> {convertToKilometersPerHour(gpsApiData?.wind?.speed)} km/h
                 </p>
-                <p>
-                  <strong>Probability of Rain:</strong> {gpsApiData?.pop}%
+                <hr></hr>
+                {/* <p>
+                  <strong>Probability of Rain:</strong> {gpsApiData?.pop?.rain}%
                 </p>
                 <p>
                   <strong>UV Index:</strong> {gpsApiData?.uvi}
-                </p>
+                </p> */}
                 <p>
                   <strong>Humidity:</strong> {gpsApiData?.main?.humidity}%
                 </p>
+                <hr></hr>
+                <p>
+                  <strong>Pressure:</strong> {gpsApiData?.main?.pressure}hPa
+                </p>
+                <hr></hr>
                 <p>
                   <strong>Sunrise:</strong> {formatTime(gpsApiData?.sys?.sunrise)}
                 </p>
+                <hr></hr>
                 <p>
                   <strong>Sunset:</strong> {formatTime(gpsApiData?.sys?.sunset)}
                 </p>
+                <hr></hr>
               </div>
             </>
           )}
